@@ -16,11 +16,7 @@ from matplotlib import rcParams
 from argparse import ArgumentParser
 
 parser = ArgumentParser(description="Phase_M phases the haplotype of the parent of a family whenever there are supporting variants in this region, heterozygous in one parent and homozygous in the other parent" +
-<<<<<<< HEAD
-  "                                                                                                                ------------------------------------------------------------------- " +                          "  **** M.Najjar, 2024 ****")
-=======
-  "                                                                                                                ------------------------------------------------------------------- " +                          "  **** Genomics and Bioinformatics lab,  M.Najjar, 2024 ****")
->>>>>>> 93a6b06 (phase_M.py)
+  "                                                                                                                ------------------------------------------------------------------- " +                                                                            "                                     ------------------------------------------------------------------- " +                          "  **** Genomics and Bioinformatics lab,  M.Najjar, 2024 ****")
 
 parser.add_argument('--input_file','-i',help="The input VCF file")
 parser.add_argument('--output_file','-o',help="The Final phased image",default="Haplotype.png")
