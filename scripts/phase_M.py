@@ -1,6 +1,6 @@
 #~/miniconda3/bin/python3
 
-# ------- Barta's Lab, M.Najjar, 2024 ------- #
+# ------- M.Najjar, 2024 ------- #
 
 # Phase_M phases the haplotype of the parent of a family whenever there are supporting variants in this region, heterozygous in one parent and homozygous in the other parent
 
@@ -15,7 +15,7 @@ from matplotlib import rcParams
 from argparse import ArgumentParser
 
 parser = ArgumentParser(description="Phase_M phases the haplotype of the parent of a family whenever there are supporting variants in this region, heterozygous in one parent and homozygous in the other parent" +
-  "                                                                                                                ------------------------------------------------------------------- " +                          "  **** Barta's lab, M.Najjar, 2024 ****")
+  "                                                                                                                ------------------------------------------------------------------- " +                          "  **** M.Najjar, 2024 ****")
 
 parser.add_argument('--input_file','-i',help="The input VCF file")
 parser.add_argument('--output_file','-o',help="The Final phased image",default="Haplotype.png")
