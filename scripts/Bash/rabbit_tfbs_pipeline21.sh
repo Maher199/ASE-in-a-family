@@ -6,6 +6,8 @@
 #This is made to be a one-time-use script, reuse with caution
 #Progressing from fastq up to gvcf
 
+# Thanks to Zsófia Fekete / MATE - Genomics and Bioinformatics lab
+
 genome="OryCun_3.0.fasta"
 knownsites="oc.hoax.vcf" # Required, can be just one pretended row
 path="~tfbs_mutations/"
