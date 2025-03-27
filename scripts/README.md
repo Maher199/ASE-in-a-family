@@ -1,1 +1,1 @@
-![Alt text](Slide4.jpg4.jpg4.jpg4.jpg)
+![Alt text](Slide4.jpg)
