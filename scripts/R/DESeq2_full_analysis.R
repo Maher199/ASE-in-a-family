@@ -12,7 +12,7 @@ print(args)
 
 ####  >>
 # loading libraries
-    <<  ####
+    #### <<<
 suppressMessages(library(DESeq2))
 suppressMessages(library(plyr))
 suppressMessages(library(dplyr))
