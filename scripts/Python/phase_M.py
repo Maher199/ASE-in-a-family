@@ -1,7 +1,6 @@
 #~/miniconda3/bin/python3
 
-
-# ------- Genomics and Bioinformatics lab,  M.Najjar, 2024 ------- #
+# ------- Barta's Lab, M.Najjar, 2024 ------- #
 
 # Phase_M phases the haplotype of the parent of a family whenever there are supporting variants in this region, heterozygous in one parent and homozygous in the other parent
 
@@ -16,27 +15,44 @@ from matplotlib import rcParams
 from argparse import ArgumentParser
 
 parser = ArgumentParser(description="Phase_M phases the haplotype of the parent of a family whenever there are supporting variants in this region, heterozygous in one parent and homozygous in the other parent" +
-  "                                                                                                                ------------------------------------------------------------------- " +                                                                            "                                     ------------------------------------------------------------------- " +                          "  **** Genomics and Bioinformatics lab,  M.Najjar, 2024 ****")
+  "                                                                                                                ------------------------------------------------------------------- " +                          "  **** Barta's lab, M.Najjar, 2024 ****")
 
 parser.add_argument('--input_file','-i',help="The input VCF file")
 parser.add_argument('--output_file','-o',help="The Final phased image",default="Haplotype.png")
 parser.add_argument('--chromosme','-chr',help="Specify the chromosme needed to be phased")
 parser.add_argument('--start','-s',type=int,help="Start region to be phased",)
 parser.add_argument('--end','-e',type=int,help="End region to be phased")
+parser.add_argument('--father','-f',help="Father_Sample")
+parser.add_argument('--mother','-m',help="Mother_Sample")
 args = parser.parse_args()
-
 
 ### Parsing VCF and extract the corresponding region
 
 def parse_vcf(vcf,Chr,Start,End):
-    vcf_file = pd.read_csv(vcf, comment="#", header=None, sep="\t")
-    columns_names=['CHROM', 'POS', 'ID', 'REF', 'ALT', 'QUAL', 'FILTER', 'INFO','INFO_GT','mother', 'child_1', 'child_2', 'child_3', 'child_4', 'child_5', 'child_6', 'child_7', 'child_8', 'father']
+    with open(vcf, 'r') as f:
+        for line in f:
+            if line.startswith('#CHROM'):
+                columns = line.strip().split('\t')  # Extract column names
+                break
+    columns[0] = 'CHROM'
+    vcf_file = pd.read_csv(vcf, comment="#", names=columns, sep="\t")
 
+    sample_columns = columns[9:]
+    renamed_samples = {}
+    child_counter = 1
 
-    vcf_file.columns = columns_names
+    for sample in sample_columns:
+        if sample == mother:
+            renamed_samples[sample] = 'mother'
+        elif sample == father:
+            renamed_samples[sample] = 'father'
+        else:
+            renamed_samples[sample] = f'child_{child_counter}'
+            child_counter += 1
+    vcf_file.rename(columns=renamed_samples, inplace=True)
     genotype_df = pd.DataFrame()
 
-    # Add chromosome and position columns
+    # Add chromo and pos columns
     genotype_df["CHROM"] = vcf_file["CHROM"]
     genotype_df["POS"] = vcf_file["POS"]
 
@@ -54,6 +70,8 @@ filename = args.output_file
 Chr = args.chromosme
 Start = args.start
 End = args.end
+father = args.father
+mother = args.mother
 
 Father_HET, Mother_HET = parse_vcf(vcf_file,Chr,Start,End)
 
@@ -81,6 +99,9 @@ def find_grouping(DF,parent):
 mother_like_hap = find_grouping(Mother_HET,'mother')
 father_like_hap = find_grouping(Father_HET,'father')
 
+
+print("Mother_like Group:      ", mother_like_hap)
+print("Father_like Group:      ", father_like_hap)
 ### combine the parents' haplotypes and sort the DF for plotting
 
 column_names = ['sample', 'seqname', 'start', 'end', 'haplotype']
@@ -88,7 +109,7 @@ column_names = ['sample', 'seqname', 'start', 'end', 'haplotype']
 
 FINAL_DF = pd.DataFrame(columns=column_names)
 
-#define a function to append to the Dataframe
+#to append to the Dataframe
 def append_to_final_df(child, hap_type, hap_label):
     haplotype = f"{hap_type}{hap_label}"
     row = [child, Chr, Start, End, haplotype]
@@ -107,24 +128,21 @@ for CHILD in children:
         FINAL_DF = pd.concat([FINAL_DF, append_to_final_df(f"{CHILD}_F", "F", 2)], ignore_index=True)
 
 
-
 ###PLOTTING
 
-### parameters here should be changed to accomodiate the region of interest,e.g. colors and hashes
+
 
 import matplotlib.patches as patches
 #define haplotype colors and hatch 
 haplotype_colors = {'M1': 'red', 'M2': 'green', 'F1': 'red', 'F2': 'green'}
 haplotype_hatches = {'M1': '', 'M2': '', 'F1': '///', 'F2': '///'}
-#haplotype_labels = {'M1': '    B', 'M2': '    B', 'F1': '    A', 'F2': '    B'}  # Letters to plot on bars
+haplotype_labels = {'M1': '    A', 'M2': '    A', 'F1': '    A', 'F2': '    B'}  # Letters to plot on bars
 df = FINAL_DF.copy()
 def plot_haplotype_distribution(df, region_start, region_end, filename):
     plt.figure(figsize=(17, 13))
     
-    desired_order = ['child_1_M', 'child_1_F', 'child_4_M', 'child_4_F', 
-                 'child_7_M', 'child_7_F', 'child_3_M', 'child_3_F',
-                 'child_5_M', 'child_5_F', 'child_8_M', 'child_8_F',
-                 'child_2_M', 'child_2_F', 'child_6_M', 'child_6_F']
+    desired_order = [f"child_{i+1}_{sex}" for i in range(len(children)) for sex in ('M', 'F')]
+
 
     # Convert 'sample' column to categorical
     df['sample'] = pd.Categorical(df['sample'], categories=desired_order, ordered=True)
@@ -175,12 +193,12 @@ def plot_haplotype_distribution(df, region_start, region_end, filename):
     plt.ylabel('Position')
     plt.xticks(x_positions, df['sample'], rotation=90) 
     plt.xlabel('Sample')
-    plt.title('Haplotype Distribution')
+    #plt.title('Haplotype Distribution')
     
     # Add legend, place it 
     handles, labels = plt.gca().get_legend_handles_labels()
     by_label = dict(sorted(zip(labels, handles), key=lambda x: x[0]))
-    plt.legend(by_label.values(), by_label.keys(), title="Haplotype", loc='lower right')
+    #plt.legend(by_label.values(), by_label.keys(), title="Haplotype", loc='lower right')
 
     # Save
     plt.savefig(filename, dpi=300, bbox_inches='tight')  #high resolution
